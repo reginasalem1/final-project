@@ -1,24 +1,194 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Italy Virtual Tour</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
+<meta charset="utf-8">
+<title>RegiMap</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+<style>
+
+        body { 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        #map { 
+            position: absolute; 
+            top: 0; 
+            bottom: 0; 
+            width: 100%; 
+        }
+
+        .mapboxgl-popup {
+            max-width: 200px;
+            font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .mapboxgl-popup-content {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .mapboxgl-popup-close-button {
+            display: none;
+        }
+
+        #resetButton {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1; /* Ensure the button appears above the map */
+            padding: 10px;
+            background-color: #ffffff;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #imageContainer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1; /* Ensure the image container appears above the map */
+            max-width: 200px;
+        }
+
+        /* CSS for styling the images */
+        .city-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+</style>
 
 </head>
 <body>
-    <div class="page">
-    <h1 id="mapTitle"> Explore <br> the World <br>through my Experiences</h1>
-    <div id="map" class="map">
-        <iframe width='100%' height='805px' src="https://api.mapbox.com/styles/v1/reginasalem/clumug8j0033v01qffegi7mxc.html?title=false&access_token=pk.eyJ1IjoicmVnaW5hc2FsZW0iLCJhIjoiY2x1cmZwZGQ2MDZtNTJtcW1wcHpvY2lyeCJ9.gp0Xi25tdMuMxtE0VTHdpQ&zoomwheel=false#2/37.27/-42.33" title="regiMap" style="border:none;"></iframe>        <!-- <a href="florence.html" id="map-marker-florence" class="city-link"></a>
-        <a href="milan.html" id="map-marker-milan" class="city-link"></a>
-        <a href="venice.html" id="map-marker-venice" class="city-link"></a> -->
-    </div>
-    </div>
 
-    <script src="script.js"></script>
+<div id="map"></div>
+<button id="resetButton">Reset Map</button>
+<div id="imageContainer"></div>
+
+<script>
+	mapboxgl.accessToken = 'pk.eyJ1IjoicmVnaW5hc2FsZW0iLCJhIjoiY2x1cmZwZGQ2MDZtNTJtcW1wcHpvY2lyeCJ9.gp0Xi25tdMuMxtE0VTHdpQ';
+    const map = new mapboxgl.Map({
+        container: 'map', 
+        style: `mapbox://styles/mapbox/standard`,
+        projection: 'globe',
+        center: [-35, 33], // Original center (USA)
+        zoom: 2,
+    });
+
+    const cities = [
+        { name: 'San Francisco', coordinates: [-122.4194, 37.7749], image: 'sanfrancisco.jpg' },
+        { name: 'Los Angeles', coordinates: [-118.2437, 34.0522] },
+        { name: 'Las Vegas', coordinates: [-115.1398, 36.1699] },
+        { name: 'Sedona', coordinates: [-111.789, 34.8697] },
+        { name: 'Vail', coordinates: [-106.348, 39.6403] },
+        { name: 'Houston', coordinates: [-95.3698, 29.7604] },
+        { name: 'Chicago', coordinates: [-87.6298, 41.8781] },
+        { name: 'New York', coordinates: [-74.006, 40.7128] },
+        { name: 'Miami', coordinates: [-80.1917, 25.7617] },
+        { name: 'Bahamas', coordinates: [-77.3963, 25.0343] },
+        { name: 'Cartagena', coordinates: [-75.5439, 10.391] },
+        { name: 'Medellin', coordinates: [-75.5796, 6.2442] },
+        { name: 'Guayaquil', coordinates: [-79.9003, -2.1709] },
+        { name: 'Quito', coordinates: [-78.4678, -0.1807] },
+        { name: 'Cuenca', coordinates: [-79.0025, -2.8894] },
+        { name: 'Puerto Vallarta', coordinates: [-105.2519, 20.6534] },
+        { name: 'Cancun', coordinates: [-86.8515, 21.1619] },
+        { name: 'Mexico City', coordinates: [-99.1332, 19.4326] },
+        { name: 'Panama', coordinates: [-79.5167, 8.9833] },
+        { name: 'Edinburgh', coordinates: [-3.1883, 55.9533] },
+        { name: 'London', coordinates: [-0.1276, 51.5074] },
+        { name: 'Paris', coordinates: [2.3522, 48.8566] },
+        { name: 'Madrid', coordinates: [-3.7038, 40.4168] },
+        { name: 'Lago di Como', coordinates: [9.2878, 45.964] },
+        { name: 'Rome', coordinates: [12.4964, 41.9028] },
+        { name: 'Milan', coordinates: [9.19, 45.4642] },
+        { name: 'Florence', coordinates: [11.2558, 43.7696] },
+        { name: 'Lebanon', coordinates: [35.8623, 33.8547] },
+        { name: 'Ankara', coordinates: [32.8597, 39.9334] }
+    ];
+
+    cities.forEach(city => {
+        // Create a marker for the city
+        const marker = new mapboxgl.Marker({
+            color: '#ff5050',
+            scale: 0.4
+        })
+            .setLngLat(city.coordinates)
+            .addTo(map);
+
+        // Create a popup with the city name
+        const popup = new mapboxgl.Popup({
+            offset: 25
+        })
+            
+            .setText(city.name);
+
+        marker.setPopup(popup);
+
+        // Show popup when hovering over the marker
+        marker.getElement().addEventListener('mouseenter', () => {
+            popup.addTo(map);
+        });
+
+        // Hide popup when mouse leaves the marker
+        marker.getElement().addEventListener('mouseleave', () => {
+            popup.remove();
+        });
+
+        // Add click event listener to the marker
+        marker.getElement().addEventListener('click', () => {
+            // Define the new zoom level
+            const newZoom = 10; // Adjust as needed
+
+            // Get the marker's current coordinates
+            const lngLat = marker.getLngLat();
+
+            // Fly to the marker's coordinates at the new zoom level
+            map.flyTo({
+                center: lngLat, // Fly to the marker's coordinates
+                zoom: newZoom, // Zoom to the new level
+                essential: true // This animation is considered essential with respect to prefers-reduced-motion
+            });
+
+            displayCityImage(city.image);
+
+        });
+    });
+
+        function displayCityImage(imageUrl) {
+        // Clear existing images
+        document.getElementById('imageContainer').innerHTML = '';
+
+        // Create an image element
+        const imageElement = document.createElement('img');
+        imageElement.src = imageUrl;
+        imageElement.classList.add('city-image');
+
+        // Append the image element to the image container
+        document.getElementById('imageContainer').appendChild(imageElement);
+    }
+
+        document.getElementById('resetButton').addEventListener('click', () => {
+        // Reset the map to its original position and zoom level
+        map.flyTo({
+            center: [-35, 33], // Original center (USA)
+            zoom: 2, // Original zoom level
+            essential: true // This animation is considered essential with respect to prefers-reduced-motion
+    });
+
+    document.getElementById('imageContainer').innerHTML = '';
+
+ });
+
+    
+</script>
 
 </body>
 </html>
