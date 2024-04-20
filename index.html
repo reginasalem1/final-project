@@ -2,66 +2,87 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>RegiMap</title>
+<title>Regi Memory Map</title>
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 <style>
 
-        body { 
-            margin: 0; 
-            padding: 0; 
-        }
+    body { 
+        margin: 0; 
+        padding: 0; 
+        display: flex; /* Use flexbox to create a flexible layout */
+        height: 100vh; /* Set body height to fill the viewport */
+        overflow: hidden; /* Prevent body overflow */
+    }
 
-        #map { 
-            position: absolute; 
-            top: 0; 
-            bottom: 0; 
-            width: 100%; 
-        }
+    #map { 
+    flex: 0 0 80%; /* Take up 80% of the available space */
+    height: 100%; /* Adjust height to fill the viewport */
+    }
 
-        .mapboxgl-popup {
-            max-width: 200px;
-            font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-            font-size: 12px;
-            font-weight: 700;
-        }
 
-        .mapboxgl-popup-content {
-            padding: 10px;
-            text-align: center;
-        }
+    .mapboxgl-popup {
+        max-width: 200px;
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+    }
 
-        .mapboxgl-popup-close-button {
-            display: none;
-        }
+    .mapboxgl-popup-content {
+        padding: 10px;
+        text-align: center;
+    }
 
-        #resetButton {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1; /* Ensure the button appears above the map */
-            padding: 10px;
-            background-color: #ffffff;
-            border: 1px solid #cccccc;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+    .mapboxgl-popup-close-button {
+        display: none;
+    }
 
-        #imageContainer {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 1; /* Ensure the image container appears above the map */
-            max-width: 200px;
-        }
+    #resetButton {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 1; /* Ensure the button appears above the map */
+        padding: 10px;
+        background-color: #ffffff;
+        border: 1px solid #cccccc;
+        border-radius: 5px;
+        cursor: pointer;
+    }
 
-        /* CSS for styling the images */
-        .city-image {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 10px;
-        }
+    #carousel { 
+        flex: 1; /* Take up remaining space */
+        height: 100%; /* Adjust height to fill the viewport */
+        overflow-y: auto; /* Enable vertical scrolling if needed */
+        background-color: beige;
+    }
+
+    #imageContainer { 
+        width: 100%; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        flex-wrap: wrap; /* Allow images to wrap to the next line */
+    }
+
+    .city-image { 
+    max-width: 100%; 
+    height: auto; 
+    margin: 10px; /* Add margin between images */
+}
+
+    .active { 
+        display: block; 
+    }
+
+    p {
+        text-align: center;
+        color: rgb(36, 54, 99);
+        margin-top: 100%;
+        font-size: 500%;
+        font-weight: bolder;
+        font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    }
 
 </style>
 
@@ -70,7 +91,11 @@
 
 <div id="map"></div>
 <button id="resetButton">Reset Map</button>
-<div id="imageContainer"></div>
+<div id="carousel">
+    <div id="imageContainer">
+        <p id="noImagesText">MY<br>PICS</p>
+    </div>
+</div>
 
 <script>
 	mapboxgl.accessToken = 'pk.eyJ1IjoicmVnaW5hc2FsZW0iLCJhIjoiY2x1cmZwZGQ2MDZtNTJtcW1wcHpvY2lyeCJ9.gp0Xi25tdMuMxtE0VTHdpQ';
@@ -78,40 +103,41 @@
         container: 'map', 
         style: `mapbox://styles/mapbox/standard`,
         projection: 'globe',
-        center: [-35, 33], // Original center (USA)
+        center: [-35, 33], 
         zoom: 2,
     });
 
     const cities = [
-        { name: 'San Francisco', coordinates: [-122.4194, 37.7749], image: 'sanfrancisco.jpg' },
+        { name: 'San Francisco', coordinates: [-122.4194, 37.7749], images: ['sanfrancisco.jpg' ]},
         { name: 'Los Angeles', coordinates: [-118.2437, 34.0522] },
         { name: 'Las Vegas', coordinates: [-115.1398, 36.1699] },
         { name: 'Sedona', coordinates: [-111.789, 34.8697] },
         { name: 'Vail', coordinates: [-106.348, 39.6403] },
         { name: 'Houston', coordinates: [-95.3698, 29.7604] },
-        { name: 'Chicago', coordinates: [-87.6298, 41.8781] },
+        { name: 'Chicago', coordinates: [-87.6298, 41.8781], images: ['chi1.jpeg', 'chi2.jpeg', 'chi3.jpeg' ]},
         { name: 'New York', coordinates: [-74.006, 40.7128] },
-        { name: 'Miami', coordinates: [-80.1917, 25.7617] },
+        { name: 'Miami', coordinates: [-80.1917, 25.7617], images: ['mia1.jpeg', 'mia2.jpeg', 'mia3.jpeg', 'mia4.jpeg' ]},
         { name: 'Bahamas', coordinates: [-77.3963, 25.0343] },
-        { name: 'Cartagena', coordinates: [-75.5439, 10.391] },
+        { name: 'Cartagena', coordinates: [-75.5439, 10.391], images: ['ctg1.jpeg', 'ctg2.jpeg', 'ctg3.jpeg', 'ctg4.jpeg' ]},
         { name: 'Medellin', coordinates: [-75.5796, 6.2442] },
-        { name: 'Guayaquil', coordinates: [-79.9003, -2.1709] },
+        { name: 'Guayaquil', coordinates: [-79.9003, -2.1709], images: ['gye1.jpeg', 'gye2.jpeg', 'gye3.jpeg', 'gye4.jpeg' ]},
         { name: 'Quito', coordinates: [-78.4678, -0.1807] },
         { name: 'Cuenca', coordinates: [-79.0025, -2.8894] },
-        { name: 'Puerto Vallarta', coordinates: [-105.2519, 20.6534] },
-        { name: 'Cancun', coordinates: [-86.8515, 21.1619] },
+        { name: 'Puerto Vallarta', coordinates: [-105.2519, 20.6534], images: ['pv1.jpeg', 'pv2.jpeg', 'pv3.jpeg' ]},
+        { name: 'Cancun', coordinates: [-86.8515, 21.1619], images: ['cnc1.jpeg', 'cnc2.jpeg' ]},
         { name: 'Mexico City', coordinates: [-99.1332, 19.4326] },
-        { name: 'Panama', coordinates: [-79.5167, 8.9833] },
-        { name: 'Edinburgh', coordinates: [-3.1883, 55.9533] },
-        { name: 'London', coordinates: [-0.1276, 51.5074] },
-        { name: 'Paris', coordinates: [2.3522, 48.8566] },
-        { name: 'Madrid', coordinates: [-3.7038, 40.4168] },
-        { name: 'Lago di Como', coordinates: [9.2878, 45.964] },
-        { name: 'Rome', coordinates: [12.4964, 41.9028] },
-        { name: 'Milan', coordinates: [9.19, 45.4642] },
-        { name: 'Florence', coordinates: [11.2558, 43.7696] },
-        { name: 'Lebanon', coordinates: [35.8623, 33.8547] },
-        { name: 'Ankara', coordinates: [32.8597, 39.9334] }
+        { name: 'Panama', coordinates: [-79.5167, 8.9833], images: ['pnm.jpeg' ]},
+        { name: 'Croatia', coordinates: [15.2000, 45.1000], images: ['cro1.jpeg', 'cro2.jpeg', 'cro3.jpg', 'cro4.jpg'] },
+        { name: 'Edinburgh', coordinates: [-3.1883, 55.9533], images: ['edi1.jpg', 'edi2.jpg' ]},
+        { name: 'London', coordinates: [-0.1276, 51.5074], images: ['ldn1.jpeg', 'ldn2.jpeg', 'ldn3.jpeg', 'ldn4.jpeg'  ]},
+        { name: 'Paris', coordinates: [2.3522, 48.8566], images: ['par1.jpeg', 'par2.jpeg', 'par3.jpeg' ]},
+        { name: 'Madrid', coordinates: [-3.7038, 40.4168], images: ['mad1.jpeg', 'mad2.jpeg', 'mad3.jpeg' ]},
+        { name: 'Lago di Como', coordinates: [9.2878, 45.964], images: ['ldc1.jpeg', 'ldc2.jpeg', 'ldc3.jpeg' ]},
+        { name: 'Rome', coordinates: [12.4964, 41.9028], images: ['rom1.jpeg', 'rom2.jpeg', 'rom3.jpeg' ]},
+        { name: 'Milan', coordinates: [9.19, 45.4642], images: ['mil1.jpeg', 'mil2.jpeg', 'mil3.jpeg' ]},
+        { name: 'Florence', coordinates: [11.2558, 43.7696], images: ['flo1.jpeg', 'flo2.jpeg', 'flo3.jpeg' ]},
+        { name: 'Lebanon', coordinates: [35.8623, 33.8547], images: ['leb1.jpeg', 'leb2.jpeg', 'leb3.jpeg', 'leb4.jpeg' ]},
+        { name: 'Ankara', coordinates: [32.8597, 39.9334], images: ['turk1.jpeg', 'turk2.MOV' ]}
     ];
 
     cities.forEach(city => {
@@ -157,35 +183,42 @@
                 essential: true // This animation is considered essential with respect to prefers-reduced-motion
             });
 
-            displayCityImage(city.image);
+            displayCityImages(city.images);
 
         });
     });
 
-        function displayCityImage(imageUrl) {
-        // Clear existing images
-        document.getElementById('imageContainer').innerHTML = '';
+    function displayCityImages(images) {
+    console.log('Displaying city images:', images); // Log the images array to console
+    // Clear existing images
+    const imageContainer = document.getElementById('imageContainer');
+    imageContainer.innerHTML = '';
 
-        // Create an image element
+    // Create image elements and add them to the carousel
+    images.forEach((imageUrl) => {
         const imageElement = document.createElement('img');
         imageElement.src = imageUrl;
         imageElement.classList.add('city-image');
+        imageContainer.appendChild(imageElement);
+    });
+}
 
-        // Append the image element to the image container
-        document.getElementById('imageContainer').appendChild(imageElement);
-    }
-
-        document.getElementById('resetButton').addEventListener('click', () => {
+    document.getElementById('resetButton').addEventListener('click', () => {
         // Reset the map to its original position and zoom level
         map.flyTo({
             center: [-35, 33], // Original center (USA)
             zoom: 2, // Original zoom level
             essential: true // This animation is considered essential with respect to prefers-reduced-motion
+        });
+
+        // Clear the image container and add the text back
+        const imageContainer = document.getElementById('imageContainer');
+        imageContainer.innerHTML = '';
+
+        const noImagesText = document.createElement('p');
+        noImagesText.textContent = "MY PICS";
+        imageContainer.appendChild(noImagesText);
     });
-
-    document.getElementById('imageContainer').innerHTML = '';
-
- });
 
     
 </script>
