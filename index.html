@@ -11,14 +11,14 @@
     body { 
         margin: 0; 
         padding: 0; 
-        display: flex; /* Use flexbox to create a flexible layout */
-        height: 100vh; /* Set body height to fill the viewport */
-        overflow: hidden; /* Prevent body overflow */
+        display: flex; 
+        height: 100vh; 
+        overflow: hidden;
     }
 
     #map { 
-    flex: 0 0 80%; /* Take up 80% of the available space */
-    height: 100%; /* Adjust height to fill the viewport */
+    flex: 0 0 80%; 
+    height: 100%; 
     }
 
 
@@ -42,7 +42,7 @@
         position: absolute;
         top: 20px;
         left: 20px;
-        z-index: 1; /* Ensure the button appears above the map */
+        z-index: 1; 
         padding: 10px;
         background-color: #ffffff;
         border: 1px solid #cccccc;
@@ -51,9 +51,9 @@
     }
 
     #carousel { 
-        flex: 1; /* Take up remaining space */
-        height: 100%; /* Adjust height to fill the viewport */
-        overflow-y: auto; /* Enable vertical scrolling if needed */
+        flex: 1; 
+        height: 100%; 
+        overflow-y: auto; 
         background-color: beige;
     }
 
@@ -62,13 +62,13 @@
         display: flex; 
         justify-content: center; 
         align-items: center; 
-        flex-wrap: wrap; /* Allow images to wrap to the next line */
+        flex-wrap: wrap; 
     }
 
     .city-image { 
     max-width: 100%; 
     height: auto; 
-    margin: 10px; /* Add margin between images */
+    margin: 10px; 
 }
 
     .active { 
@@ -137,11 +137,11 @@
         { name: 'Milan', coordinates: [9.19, 45.4642], images: ['mil1.jpeg', 'mil2.jpeg', 'mil3.jpeg' ]},
         { name: 'Florence', coordinates: [11.2558, 43.7696], images: ['flo1.jpeg', 'flo2.jpeg', 'flo3.jpeg' ]},
         { name: 'Lebanon', coordinates: [35.8623, 33.8547], images: ['leb1.jpeg', 'leb2.jpeg', 'leb3.jpeg', 'leb4.jpeg' ]},
-        { name: 'Ankara', coordinates: [32.8597, 39.9334], images: ['turk1.jpeg', 'turk2.MOV' ]}
+        { name: 'Ankara', coordinates: [32.8597, 39.9334], images: ['turk1.jpeg' ]}
     ];
 
     cities.forEach(city => {
-        // Create a marker for the city
+
         const marker = new mapboxgl.Marker({
             color: '#ff5050',
             scale: 0.4
@@ -149,38 +149,34 @@
             .setLngLat(city.coordinates)
             .addTo(map);
 
-        // Create a popup with the city name
-        const popup = new mapboxgl.Popup({
-            offset: 25
-        })
+
+            const popup = new mapboxgl.Popup({
+                offset: 25
+            })
             
             .setText(city.name);
 
         marker.setPopup(popup);
 
-        // Show popup when hovering over the marker
         marker.getElement().addEventListener('mouseenter', () => {
             popup.addTo(map);
         });
 
-        // Hide popup when mouse leaves the marker
         marker.getElement().addEventListener('mouseleave', () => {
             popup.remove();
         });
 
-        // Add click event listener to the marker
-        marker.getElement().addEventListener('click', () => {
-            // Define the new zoom level
-            const newZoom = 10; // Adjust as needed
 
-            // Get the marker's current coordinates
+        marker.getElement().addEventListener('click', () => {
+
+            const newZoom = 10; 
+
             const lngLat = marker.getLngLat();
 
-            // Fly to the marker's coordinates at the new zoom level
             map.flyTo({
                 center: lngLat, // Fly to the marker's coordinates
-                zoom: newZoom, // Zoom to the new level
-                essential: true // This animation is considered essential with respect to prefers-reduced-motion
+                zoom: newZoom, // Zoom
+                essential: true
             });
 
             displayCityImages(city.images);
@@ -189,12 +185,11 @@
     });
 
     function displayCityImages(images) {
-    console.log('Displaying city images:', images); // Log the images array to console
-    // Clear existing images
+    console.log('Displaying city images:', images); 
+
     const imageContainer = document.getElementById('imageContainer');
     imageContainer.innerHTML = '';
 
-    // Create image elements and add them to the carousel
     images.forEach((imageUrl) => {
         const imageElement = document.createElement('img');
         imageElement.src = imageUrl;
@@ -206,9 +201,9 @@
     document.getElementById('resetButton').addEventListener('click', () => {
         // Reset the map to its original position and zoom level
         map.flyTo({
-            center: [-35, 33], // Original center (USA)
-            zoom: 2, // Original zoom level
-            essential: true // This animation is considered essential with respect to prefers-reduced-motion
+            center: [-35, 33],
+            zoom: 2, 
+            essential: true 
         });
 
         // Clear the image container and add the text back
