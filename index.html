@@ -255,7 +255,7 @@ document.getElementById('addMarkerButton').addEventListener('click', () => {
 });
 
 map.on('click', (e) => {
-    if (markerPlacementMode && markerCreationMode) { // Check both markerPlacementMode and markerCreationMode
+    if (markerPlacementMode && markerCreationMode) {
         const newMarker = createMarker({ coordinates: [e.lngLat.lng, e.lngLat.lat], name: 'New Marker', images: [] });
 
         // Show file upload button
@@ -263,6 +263,33 @@ map.on('click', (e) => {
 
         // Reset marker creation mode after creating a new marker
         markerCreationMode = false;
+
+        // Store the reference to the new marker
+        newMarkers.push(newMarker);
+    }
+});
+
+// Array to store references to the new markers
+const newMarkers = [];
+
+// Handle file selection event
+document.getElementById('imageUploadInput').addEventListener('change', (event) => {
+    const files = event.target.files;
+    const imageUrls = [];
+
+    // Loop through the selected files and create URLs for each one
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const imageUrl = URL.createObjectURL(file);
+        imageUrls.push(imageUrl);
+    }
+
+    displayCityImages(imageUrls); // Function to display images for the new marker
+
+    // Update the city object associated with the new marker
+    const newMarkerIndex = cities.findIndex(city => city.name === 'New Marker');
+    if (newMarkerIndex !== -1) {
+        cities[newMarkerIndex].images = imageUrls;
     }
 });
 
@@ -285,12 +312,23 @@ function displayCityImages(images) {
     const imageContainer = document.getElementById('imageContainer');
     imageContainer.innerHTML = '';
 
+    const imageUrls = []; // Array to store image URLs
+
     images.forEach((imageUrl) => {
         const imageElement = document.createElement('img');
         imageElement.src = imageUrl;
         imageElement.classList.add('city-image');
         imageContainer.appendChild(imageElement);
+
+        // Add the image URL to the array
+        imageUrls.push(imageUrl);
     });
+
+    // Update the city object with the new image URLs
+    const newMarkerIndex = cities.findIndex(city => city.name === 'New Marker');
+    if (newMarkerIndex !== -1) {
+        cities[newMarkerIndex].images = imageUrls;
+    }
 }
 
 document.getElementById('resetButton').addEventListener('click', () => {
