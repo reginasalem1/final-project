@@ -21,7 +21,6 @@
     height: 100%; 
     }
 
-
     .mapboxgl-popup {
         max-width: 200px;
         font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
@@ -43,6 +42,18 @@
         top: 20px;
         left: 20px;
         z-index: 1; 
+        padding: 10px;
+        background-color: #ffffff;
+        border: 1px solid #cccccc;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    #addMarkerButton {
+        position: absolute;
+        top: 70px;
+        left: 20px;
+        z-index: 1;
         padding: 10px;
         background-color: #ffffff;
         border: 1px solid #cccccc;
@@ -91,14 +102,18 @@
 
 <div id="map"></div>
 <button id="resetButton">Reset Map</button>
+<button id="addMarkerButton">Add Marker</button>
 <div id="carousel">
     <div id="imageContainer">
         <p id="noImagesText">MY<br>PICS</p>
     </div>
 </div>
 
+<!-- Add an input element for file upload -->
+<input type="file" id="imageUploadInput" style="display: none;" accept="image/*">
+
 <script>
-	mapboxgl.accessToken = 'pk.eyJ1IjoicmVnaW5hc2FsZW0iLCJhIjoiY2x1cmZwZGQ2MDZtNTJtcW1wcHpvY2lyeCJ9.gp0Xi25tdMuMxtE0VTHdpQ';
+    mapboxgl.accessToken = 'pk.eyJ1IjoicmVnaW5hc2FsZW0iLCJhIjoiY2x1cmZwZGQ2MDZtNTJtcW1wcHpvY2lyeCJ9.gp0Xi25tdMuMxtE0VTHdpQ';
     const map = new mapboxgl.Map({
         container: 'map', 
         style: `mapbox://styles/mapbox/standard`,
@@ -115,7 +130,7 @@
         { name: 'Vail', coordinates: [-106.348, 39.6403] },
         { name: 'Houston', coordinates: [-95.3698, 29.7604] },
         { name: 'Chicago', coordinates: [-87.6298, 41.8781], images: ['chi1.jpeg', 'chi2.jpeg', 'chi3.jpeg' ]},
-        { name: 'New York', coordinates: [-74.006, 40.7128] },
+        { name: 'New York', coordinates: [-74.006, 40.7128], images: ['nyc.jpg', 'nyc1.jpg', 'nyc2.jpg']},
         { name: 'Miami', coordinates: [-80.1917, 25.7617], images: ['mia1.jpeg', 'mia2.jpeg', 'mia3.jpeg', 'mia4.jpeg' ]},
         { name: 'Bahamas', coordinates: [-77.3963, 25.0343] },
         { name: 'Cartagena', coordinates: [-75.5439, 10.391], images: ['ctg1.jpeg', 'ctg2.jpeg', 'ctg3.jpeg', 'ctg4.jpeg' ]},
@@ -127,34 +142,43 @@
         { name: 'Cancun', coordinates: [-86.8515, 21.1619], images: ['cnc1.jpeg', 'cnc2.jpeg' ]},
         { name: 'Mexico City', coordinates: [-99.1332, 19.4326] },
         { name: 'Panama', coordinates: [-79.5167, 8.9833], images: ['pnm.jpeg' ]},
-        { name: 'Croatia', coordinates: [15.2000, 45.1000], images: ['cro1.jpeg', 'cro2.jpeg', 'cro3.jpg', 'cro4.jpg'] },
+        { name: 'Croatia', coordinates: [15.2000, 45.1000], images: ['cro1.jpg', 'cro2.jpeg', 'cro3.jpeg', 'cro4.jpg'] },
         { name: 'Edinburgh', coordinates: [-3.1883, 55.9533], images: ['edi1.jpg', 'edi2.jpg' ]},
-        { name: 'London', coordinates: [-0.1276, 51.5074], images: ['ldn1.jpeg', 'ldn2.jpeg', 'ldn3.jpeg', 'ldn4.jpeg'  ]},
-        { name: 'Paris', coordinates: [2.3522, 48.8566], images: ['par1.jpeg', 'par2.jpeg', 'par3.jpeg' ]},
+        { name: 'London', coordinates: [-0.1276, 51.5074], images: ['ldn1.jpeg', 'ldn2.jpg', 'ldn3.jpeg', 'ldn4.jpeg'  ]},
+        { name: 'Paris', coordinates: [2.3522, 48.8566], images: ['par1.jpg', 'par2.jpeg', 'par3.jpeg' ]},
         { name: 'Madrid', coordinates: [-3.7038, 40.4168], images: ['mad1.jpeg', 'mad2.jpeg', 'mad3.jpeg' ]},
         { name: 'Lago di Como', coordinates: [9.2878, 45.964], images: ['ldc1.jpeg', 'ldc2.jpeg', 'ldc3.jpeg' ]},
         { name: 'Rome', coordinates: [12.4964, 41.9028], images: ['rom1.jpeg', 'rom2.jpeg', 'rom3.jpeg' ]},
         { name: 'Milan', coordinates: [9.19, 45.4642], images: ['mil1.jpeg', 'mil2.jpeg', 'mil3.jpeg' ]},
         { name: 'Florence', coordinates: [11.2558, 43.7696], images: ['flo1.jpeg', 'flo2.jpeg', 'flo3.jpeg' ]},
-        { name: 'Lebanon', coordinates: [35.8623, 33.8547], images: ['leb1.jpeg', 'leb2.jpeg', 'leb3.jpeg', 'leb4.jpeg' ]},
-        { name: 'Ankara', coordinates: [32.8597, 39.9334], images: ['turk1.jpeg' ]}
+        { name: 'Lebanon', coordinates: [35.8623, 33.8547], images: ['leb.jpg', 'leb1.jpeg', 'leb2.jpeg', 'leb3.jpeg', 'leb4.jpeg', 'leb5.jpg' ]},
+        { name: 'Turkey', coordinates: [32.8597, 39.9334], images: ['turk1.jpeg', 'turk2.jpg', 'turk3.JPG']}
     ];
 
-    cities.forEach(city => {
-
+    // Existing markers
+    const existingMarkers = cities.map(city => {
         const marker = new mapboxgl.Marker({
             color: '#ff5050',
             scale: 0.4
         })
-            .setLngLat(city.coordinates)
-            .addTo(map);
+        .setLngLat(city.coordinates)
+        .addTo(map);
 
+        marker.getElement().addEventListener('click', () => {
+            const newZoom = 10;
+            map.flyTo({
+                center: city.coordinates,
+                zoom: newZoom,
+                essential: true
+            });
 
-            const popup = new mapboxgl.Popup({
-                offset: 25
-            })
-            
-            .setText(city.name);
+            displayCityImages(city.images);
+        });
+
+        const popup = new mapboxgl.Popup({
+            offset: 25
+        })
+        .setText(city.name);
 
         marker.setPopup(popup);
 
@@ -166,47 +190,78 @@
             popup.remove();
         });
 
+        return marker;
+    });
 
-        marker.getElement().addEventListener('click', () => {
+    let markerPlacementMode = false;
 
-            const newZoom = 10; 
+    document.getElementById('addMarkerButton').addEventListener('click', () => {
+        markerPlacementMode = !markerPlacementMode;
+    });
 
-            const lngLat = marker.getLngLat();
+    map.on('click', (e) => {
+        if (markerPlacementMode) {
+            const newMarker = new mapboxgl.Marker({
+                color: '#800080', // Purple color
+                scale: 0.4
+            })
+            .setLngLat(e.lngLat)
+            .addTo(map);
 
-            map.flyTo({
-                center: lngLat, // Fly to the marker's coordinates
-                zoom: newZoom, // Zoom
-                essential: true
+            // Prompt the user to upload pictures for the new marker
+            document.getElementById('imageUploadInput').click();
+
+            // Handle file selection event
+            document.getElementById('imageUploadInput').addEventListener('change', (event) => {
+                const files = event.target.files;
+                const imageUrls = [];
+
+                // Loop through the selected files and create URLs for each one
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const imageUrl = URL.createObjectURL(file);
+                    imageUrls.push(imageUrl);
+                }
+
+                displayCityImages(imageUrls); // Function to display images for the new marker
             });
 
-            displayCityImages(city.images);
+            const popup = new mapboxgl.Popup({
+                offset: 25
+            })
+            .setText('New Marker');
 
-        });
+            newMarker.setPopup(popup);
+
+            newMarker.getElement().addEventListener('mouseenter', () => {
+                popup.addTo(map);
+            });
+
+            newMarker.getElement().addEventListener('mouseleave', () => {
+                popup.remove();
+            });
+        }
     });
 
     function displayCityImages(images) {
-    console.log('Displaying city images:', images); 
+        const imageContainer = document.getElementById('imageContainer');
+        imageContainer.innerHTML = '';
 
-    const imageContainer = document.getElementById('imageContainer');
-    imageContainer.innerHTML = '';
-
-    images.forEach((imageUrl) => {
-        const imageElement = document.createElement('img');
-        imageElement.src = imageUrl;
-        imageElement.classList.add('city-image');
-        imageContainer.appendChild(imageElement);
-    });
-}
+        images.forEach((imageUrl) => {
+            const imageElement = document.createElement('img');
+            imageElement.src = imageUrl;
+            imageElement.classList.add('city-image');
+            imageContainer.appendChild(imageElement);
+        });
+    }
 
     document.getElementById('resetButton').addEventListener('click', () => {
-        // Reset the map to its original position and zoom level
         map.flyTo({
             center: [-35, 33],
             zoom: 2, 
             essential: true 
         });
 
-        // Clear the image container and add the text back
         const imageContainer = document.getElementById('imageContainer');
         imageContainer.innerHTML = '';
 
@@ -215,7 +270,6 @@
         imageContainer.appendChild(noImagesText);
     });
 
-    
 </script>
 
 </body>
